@@ -1,0 +1,24 @@
+<svg width="35" height="62" viewBox="0 0 35 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_f)">
+<path d="M16.5649 50.8387C8.90363 50.3548 5.96009 43.8629 6.00041 35.0323C5.96009 24.5081 10.8391 14.871 17.2907 6C23.7423 14.871 28.5407 24.5081 28.5811 35.0323C28.5407 43.8629 25.6778 50.3548 18.0165 50.8387" stroke="#F0FF4C" stroke-opacity="0.8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g filter="url(#filter1_f)">
+<path d="M17.2504 14.8307L18.0972 56H16.4843L17.2504 14.8307" stroke="#F0FF4C" stroke-opacity="0.8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<path d="M16.5649 50.8387C8.90363 50.3548 5.96009 43.8629 6.00041 35.0323C5.96009 24.5081 10.8391 14.871 17.2907 6C23.7423 14.871 28.5407 24.5081 28.5811 35.0323C28.5407 43.8629 25.6778 50.3548 18.0165 50.8387" stroke="#EAFF00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M17.2504 14.8307L18.0972 56H16.4843L17.2504 14.8307" stroke="#EAFF00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16.5649 50.8387C8.90363 50.3548 5.96009 43.8629 6.00041 35.0323C5.96009 24.5081 10.8391 14.871 17.2907 6C23.7423 14.871 28.5407 24.5081 28.5811 35.0323C28.5407 43.8629 25.6778 50.3548 18.0165 50.8387" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M17.2504 14.8307L18.0972 56H16.4843L17.2504 14.8307" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<defs>
+<filter id="filter0_f" x="0.321094" y="0.321094" width="33.9389" height="56.1966" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="1.33945" result="effect1_foregroundBlur"/>
+</filter>
+<filter id="filter1_f" x="10.8053" y="9.15175" width="12.9707" height="52.5272" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="1.33945" result="effect1_foregroundBlur"/>
+</filter>
+</defs>
+</svg>
