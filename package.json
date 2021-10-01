@@ -1,0 +1,22 @@
+{
+  "name": "express-mesto",
+  "version": "1.0.0",
+  "description": "backend mesto",
+  "author": "Евгения Никонова",
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.24.2",
+    "nodemon": "^2.0.13",
+    "prettier": "2.4.1"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^6.0.8"
+  }
+}
