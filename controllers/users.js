@@ -39,6 +39,7 @@ module.exports.createUser = async (req, res) => {
   } catch (err) {
     if (err.name === "ValidationError") {
       res.status(400).send({ message: "Переданы некорректные данные" });
+      return;
     }
 
     res.status(500).send({ message: "Сервер не может обработать запрос" });
@@ -69,6 +70,7 @@ module.exports.updateProfile = async (req, res) => {
   } catch (err) {
     if (err.name === "ValidationError") {
       res.status(400).send({ message: "Переданы некорректные данные" });
+      return;
     }
 
     if (err.name === "CastError") {
@@ -104,6 +106,7 @@ module.exports.updateAvatar = async (req, res) => {
   } catch (err) {
     if (err.name === "ValidationError") {
       res.status(400).send({ message: "Переданы некорректные данные" });
+      return;
     }
 
     if (err.name === "CastError") {
