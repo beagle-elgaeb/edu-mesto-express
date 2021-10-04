@@ -17,9 +17,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Ссылка должна быть введена"],
     validate: {
-      validator(v) {
-        return /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9\-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-\/])*)?/.test(
-          v
+      validator(value) {
+        return /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/.test(
+          value,
         );
       },
       message: "Некорректный URL",

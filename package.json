@@ -13,7 +13,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "lint": "eslint"
+    "lint": "npx eslint ."
   },
   "dependencies": {
     "body-parser": "^1.19.0",
