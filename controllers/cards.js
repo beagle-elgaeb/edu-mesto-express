@@ -10,11 +10,10 @@ module.exports.getCards = async (req, res) => {
 };
 
 module.exports.createCard = async (req, res) => {
-  const { _id } = req.user;
   const { name, link } = req.body;
 
   try {
-    const card = await Card.create({ name, link, owner: _id });
+    const card = await Card.create({ name, link, owner: req.user._id });
     res.send(card);
   } catch (err) {
     if (err.name === "ValidationError") {
@@ -49,11 +48,14 @@ module.exports.deleteCard = async (req, res) => {
 };
 
 module.exports.likeCard = async (req, res) => {
-  const { _id } = req.user;
   const { cardId } = req.params;
 
   try {
-    const card = await Card.findByIdAndUpdate(cardId, { $addToSet: { likes: _id } }, { new: true });
+    const card = await Card.findByIdAndUpdate(
+      cardId,
+      { $addToSet: { likes: req.user._id } },
+      { new: true },
+    );
 
     if (!card) {
       res.status(404).send({ error: "Карточка не найдена" });
@@ -72,11 +74,14 @@ module.exports.likeCard = async (req, res) => {
 };
 
 module.exports.dislikeCard = async (req, res) => {
-  const { _id } = req.user;
   const { cardId } = req.params;
 
   try {
-    const card = await Card.findByIdAndUpdate(cardId, { $pull: { likes: _id } }, { new: true });
+    const card = await Card.findByIdAndUpdate(
+      cardId,
+      { $pull: { likes: req.user._id } },
+      { new: true },
+    );
 
     if (!card) {
       res.status(404).send({ error: "Карточка не найдена" });

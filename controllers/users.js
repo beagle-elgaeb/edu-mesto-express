@@ -1,3 +1,5 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/users");
 
 module.exports.getUsers = async (req, res) => {
@@ -34,7 +36,16 @@ module.exports.createUser = async (req, res) => {
   const { name, about, avatar } = req.body;
 
   try {
-    const user = await User.create({ name, about, avatar });
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+    const user = await User.create({
+      name,
+      about,
+      avatar,
+      email: req.body.email,
+      password: hashedPassword,
+    });
+
     res.send(user);
   } catch (err) {
     if (err.name === "ValidationError") {
@@ -43,6 +54,20 @@ module.exports.createUser = async (req, res) => {
     }
 
     res.status(500).send({ message: "Сервер не может обработать запрос" });
+  }
+};
+
+module.exports.login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findUserByCredentials(email, password);
+
+    const token = jwt.sign({ _id: user._id }, "some-secret-key", { expiresIn: "7d" });
+
+    res.cookie("jwt", token, { httpOnly: true, secure: true, maxAge: 7 * 24 * 3600 * 1000 });
+  } catch (err) {
+    res.status(401).send({ message: "Ошибка авторизации" });
   }
 };
 
