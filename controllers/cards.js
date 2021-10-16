@@ -1,6 +1,7 @@
 const Card = require("../models/cards");
 const NotFoundError = require("../errors/not-found-err");
 const BadRequestError = require("../errors/bad-request-err");
+const ForbiddenError = require("../errors/forbidden-err");
 
 module.exports.getCards = async (req, res, next) => {
   try {
@@ -31,6 +32,10 @@ module.exports.deleteCard = async (req, res, next) => {
   const { cardId } = req.params;
 
   try {
+    if (cardId !== req.user._id) {
+      throw new ForbiddenError("Для этого действия недостаточно прав");
+    }
+
     const card = await Card.findByIdAndRemove(cardId);
 
     if (!card) {
