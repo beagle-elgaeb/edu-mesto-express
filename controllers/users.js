@@ -1,38 +1,36 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/users");
+const NotFoundError = require("../errors/not-found-err");
+const ConflictError = require("../errors/conflict-err");
+const BadRequestError = require("../errors/bad-request-err");
+const Unauthorized = require("../errors/unauthorized-err");
 
-module.exports.getUsers = async (req, res) => {
+module.exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     res.send(users);
   } catch (err) {
-    res.status(500).send({ message: "Сервер не может обработать запрос" });
+    next(err);
   }
 };
 
-module.exports.getUsersId = async (req, res) => {
+module.exports.getUsersId = async (req, res, next) => {
   const { userId } = req.params;
 
   try {
     const user = await User.findById(userId);
     if (!user) {
-      res.status(404).send({ error: "Пользователь не найден" });
-      return;
+      throw new NotFoundError("Пользователь не найден");
     }
 
     res.send(user);
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(400).send({ message: "Невалидный id" });
-      return;
-    }
-
-    res.status(500).send({ message: "Сервер не может обработать запрос" });
+    next(err);
   }
 };
 
-module.exports.createUser = async (req, res) => {
+module.exports.createUser = async (req, res, next) => {
   const { name, about, avatar } = req.body;
 
   try {
@@ -46,18 +44,21 @@ module.exports.createUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    res.send(user);
-  } catch (err) {
-    if (err.name === "ValidationError") {
-      res.status(400).send({ message: "Переданы некорректные данные" });
-      return;
+    if (!user) {
+      throw new BadRequestError("Переданы некорректные данные");
     }
 
-    res.status(500).send({ message: "Сервер не может обработать запрос" });
+    res.send(user);
+  } catch (err) {
+    if (err.name === "MongoError" && err.code === 11000) {
+      throw new ConflictError("Этот пользователь уже зарегистрирован");
+    }
+
+    next(err);
   }
 };
 
-module.exports.login = async (req, res) => {
+module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -65,19 +66,22 @@ module.exports.login = async (req, res) => {
 
     const token = jwt.sign({ _id: user._id }, "some-secret-key", { expiresIn: "7d" });
 
-    res.cookie("jwt", token, { httpOnly: true, secure: true, maxAge: 7 * 24 * 3600 * 1000 });
+    res
+      .cookie("jwt", token, { httpOnly: true, secure: true, maxAge: 7 * 24 * 3600 * 1000 })
+      .send({ message: "Авторизация выполнена" });
+
+    throw new Unauthorized("Ошибка авторизации");
   } catch (err) {
-    res.status(401).send({ message: "Ошибка авторизации" });
+    next(err);
   }
 };
 
-module.exports.updateProfile = async (req, res) => {
+module.exports.updateProfile = async (req, res, next) => {
   const { _id } = req.user;
   const { name, about } = req.body;
 
   if (!name || !about) {
-    res.status(400).send({ error: "Переданы некорректные данные" });
-    return;
+    throw new BadRequestError("Переданы некорректные данные");
   }
 
   try {
@@ -86,34 +90,19 @@ module.exports.updateProfile = async (req, res) => {
       { name, about },
       { new: true, runValidators: true },
     );
-    if (!userProfile) {
-      res.status(404).send({ error: "Пользователь не найден" });
-      return;
-    }
 
     res.send(userProfile);
   } catch (err) {
-    if (err.name === "ValidationError") {
-      res.status(400).send({ message: "Переданы некорректные данные" });
-      return;
-    }
-
-    if (err.name === "CastError") {
-      res.status(400).send({ message: "Невалидный id" });
-      return;
-    }
-
-    res.status(500).send({ message: "Сервер не может обработать запрос" });
+    next(err);
   }
 };
 
-module.exports.updateAvatar = async (req, res) => {
+module.exports.updateAvatar = async (req, res, next) => {
   const { _id } = req.user;
   const { avatar } = req.body;
 
   if (!avatar) {
-    res.status(400).res.send({ error: "Переданы некорректные данные" });
-    return;
+    throw new BadRequestError("Переданы некорректные данные");
   }
 
   try {
@@ -122,23 +111,9 @@ module.exports.updateAvatar = async (req, res) => {
       { avatar },
       { new: true, runValidators: true },
     );
-    if (!userAvatar) {
-      res.status(404).send({ error: "Пользователь не найден" });
-      return;
-    }
 
     res.send(userAvatar);
   } catch (err) {
-    if (err.name === "ValidationError") {
-      res.status(400).send({ message: "Переданы некорректные данные" });
-      return;
-    }
-
-    if (err.name === "CastError") {
-      res.status(400).send({ message: "Невалидный id" });
-      return;
-    }
-
-    res.status(500).send({ message: "Сервер не может обработать запрос" });
+    next(err);
   }
 };

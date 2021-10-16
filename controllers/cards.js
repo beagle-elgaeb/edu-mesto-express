@@ -1,53 +1,49 @@
 const Card = require("../models/cards");
+const NotFoundError = require("../errors/not-found-err");
+const BadRequestError = require("../errors/bad-request-err");
 
-module.exports.getCards = async (req, res) => {
+module.exports.getCards = async (req, res, next) => {
   try {
     const cards = await Card.find({});
     res.send(cards);
   } catch (err) {
-    res.status(500).send({ message: "Сервер не может обработать запрос" });
+    next(err);
   }
 };
 
-module.exports.createCard = async (req, res) => {
+module.exports.createCard = async (req, res, next) => {
   const { name, link } = req.body;
 
   try {
     const card = await Card.create({ name, link, owner: req.user._id });
-    res.send(card);
-  } catch (err) {
-    if (err.name === "ValidationError") {
-      res.status(400).send({ message: "Переданы некорректные данные" });
-      return;
+
+    if (!card) {
+      throw new BadRequestError("Переданы некорректные данные");
     }
 
-    res.status(500).send({ message: "Сервер не может обработать запрос" });
+    res.send(card);
+  } catch (err) {
+    next(err);
   }
 };
 
-module.exports.deleteCard = async (req, res) => {
+module.exports.deleteCard = async (req, res, next) => {
   const { cardId } = req.params;
 
   try {
     const card = await Card.findByIdAndRemove(cardId);
 
     if (!card) {
-      res.status(404).send({ error: "Карточка не найдена" });
-      return;
+      throw new NotFoundError("Карточка не найдена");
     }
 
     res.send(card);
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(400).send({ message: "Невалидный id" });
-      return;
-    }
-
-    res.status(500).send({ message: "Сервер не может обработать запрос" });
+    next(err);
   }
 };
 
-module.exports.likeCard = async (req, res) => {
+module.exports.likeCard = async (req, res, next) => {
   const { cardId } = req.params;
 
   try {
@@ -58,22 +54,16 @@ module.exports.likeCard = async (req, res) => {
     );
 
     if (!card) {
-      res.status(404).send({ error: "Карточка не найдена" });
-      return;
+      throw new NotFoundError("Карточка не найдена");
     }
 
     res.send(card);
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(400).send({ message: "Невалидный id" });
-      return;
-    }
-
-    res.status(500).send({ message: "Сервер не может обработать запрос" });
+    next(err);
   }
 };
 
-module.exports.dislikeCard = async (req, res) => {
+module.exports.dislikeCard = async (req, res, next) => {
   const { cardId } = req.params;
 
   try {
@@ -84,17 +74,11 @@ module.exports.dislikeCard = async (req, res) => {
     );
 
     if (!card) {
-      res.status(404).send({ error: "Карточка не найдена" });
-      return;
+      throw new NotFoundError("Карточка не найдена");
     }
 
     res.send(card);
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(400).send({ message: "Невалидный id" });
-      return;
-    }
-
-    res.status(500).send({ message: "Сервер не может обработать запрос" });
+    next(err);
   }
 };

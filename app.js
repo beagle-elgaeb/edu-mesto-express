@@ -1,5 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const { errors } = require("celebrate");
+
+const NotFoundError = require("./errors/not-found-err");
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -22,8 +25,20 @@ app.use("/cards", cardRouter);
 app.post("/signup", createUser);
 app.post("/signin", login);
 
-app.use((req, res) => {
-  res.status(404).send({ message: "Запрошена несуществующая страница" });
+app.use(() => {
+  throw new NotFoundError("Запрошена несуществующая страница");
+});
+
+app.use(errors());
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res.status(err.statusCode).send({
+    message: statusCode === 500 ? "Сервер не может обработать запрос" : message,
+  });
+
+  next();
 });
 
 app.listen(PORT, () => {
