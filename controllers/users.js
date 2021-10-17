@@ -6,6 +6,8 @@ const ConflictError = require("../errors/conflict-err");
 const BadRequestError = require("../errors/bad-request-err");
 const Unauthorized = require("../errors/unauthorized-err");
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 module.exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
@@ -15,32 +17,17 @@ module.exports.getUsers = async (req, res, next) => {
   }
 };
 
-module.exports.getUsersId = async (req, res, next) => {
-  const { userId } = req.params;
-
-  try {
-    const user = await User.findById(userId);
-    if (!user) {
-      throw new NotFoundError("Пользователь не найден");
-    }
-
-    res.send(user);
-  } catch (err) {
-    next(err);
-  }
-};
-
 module.exports.createUser = async (req, res, next) => {
-  const { name, about, avatar } = req.body;
+  const { name, about, avatar, email, password } = req.body;
 
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name,
       about,
       avatar,
-      email: req.body.email,
+      email,
       password: hashedPassword,
     });
 
@@ -64,20 +51,42 @@ module.exports.login = async (req, res, next) => {
   try {
     const user = await User.findUserByCredentials(email, password);
 
-    const token = jwt.sign({ _id: user._id }, "some-secret-key", { expiresIn: "7d" });
+    if (!user) {
+      throw new Unauthorized("Ошибка авторизации");
+    }
+
+    const token = jwt.sign(
+      { _id: user._id },
+      NODE_ENV === "production" ? JWT_SECRET : "dev-secret",
+      { expiresIn: "7d" },
+    );
 
     res
-      .cookie("jwt", token, { httpOnly: true, secure: true, maxAge: 7 * 24 * 3600 * 1000 })
+      .cookie("jwt", token, { httpOnly: true, maxAge: 7 * 24 * 3600 * 1000 })
       .send({ message: "Авторизация выполнена" });
+  } catch (err) {
+    next(err);
+  }
+};
 
-    throw new Unauthorized("Ошибка авторизации");
+module.exports.getUser = async (req, res, next) => {
+  const userId = req.user._id;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new NotFoundError("Пользователь не найден");
+    }
+
+    res.send(user);
   } catch (err) {
     next(err);
   }
 };
 
 module.exports.updateProfile = async (req, res, next) => {
-  const { _id } = req.user;
+  const userId = req.user._id;
   const { name, about } = req.body;
 
   if (!name || !about) {
@@ -86,7 +95,7 @@ module.exports.updateProfile = async (req, res, next) => {
 
   try {
     const userProfile = await User.findByIdAndUpdate(
-      _id,
+      userId,
       { name, about },
       { new: true, runValidators: true },
     );
@@ -98,7 +107,7 @@ module.exports.updateProfile = async (req, res, next) => {
 };
 
 module.exports.updateAvatar = async (req, res, next) => {
-  const { _id } = req.user;
+  const userId = req.user._id;
   const { avatar } = req.body;
 
   if (!avatar) {
@@ -107,7 +116,7 @@ module.exports.updateAvatar = async (req, res, next) => {
 
   try {
     const userAvatar = await User.findByIdAndUpdate(
-      _id,
+      userId,
       { avatar },
       { new: true, runValidators: true },
     );

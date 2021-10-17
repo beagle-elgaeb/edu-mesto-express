@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const { errors } = require("celebrate");
+const cookieParser = require("cookie-parser");
+require("dotenv").config();
 
 const NotFoundError = require("./errors/not-found-err");
 
@@ -9,6 +11,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 const { createUser, login } = require("./controllers/users");
 
@@ -19,11 +22,11 @@ mongoose.connect("mongodb://localhost:27017/mestodb", {
 const userRouter = require("./routes/users");
 const cardRouter = require("./routes/cards");
 
-app.use("/users", userRouter);
-app.use("/cards", cardRouter);
-
 app.post("/signup", createUser);
 app.post("/signin", login);
+
+app.use("/users", userRouter);
+app.use("/cards", cardRouter);
 
 app.use(() => {
   throw new NotFoundError("Запрошена несуществующая страница");
@@ -34,7 +37,7 @@ app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
-  res.status(err.statusCode).send({
+  res.status(statusCode).send({
     message: statusCode === 500 ? "Сервер не может обработать запрос" : message,
   });
 

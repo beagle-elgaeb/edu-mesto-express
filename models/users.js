@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
     required: false,
     validate: {
       validator(link) {
-        return validator.isUrl(link);
+        return validator.isURL(link);
       },
       message: "Некорректный URL",
     },
@@ -48,6 +48,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// eslint-disable-next-line func-names
 userSchema.statics.findUserByCredentials = async function (email, password) {
   const user = await this.findOne({ email }).select("+password");
 
