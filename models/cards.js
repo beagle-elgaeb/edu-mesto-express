@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -11,12 +12,11 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: [true, "Ссылка должна быть введена"],
     validate: {
-      validator(value) {
-        return /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/.test(
-          value,
-        );
+      validator(link) {
+        return validator.isURL(link);
       },
       message: "Некорректный URL",
+      require_protocol: true,
     },
   },
   owner: {

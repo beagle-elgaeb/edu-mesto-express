@@ -14,7 +14,10 @@ module.exports = (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(biscuit, NODE_ENV === "production" ? JWT_SECRET : "dev-secret");
+    payload = jwt.verify(
+      biscuit,
+      NODE_ENV === "production" ? JWT_SECRET : "dev-secret",
+    );
   } catch (err) {
     throw new Unauthorized("Необходимо авторизоваться");
   }

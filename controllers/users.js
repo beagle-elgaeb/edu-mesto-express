@@ -18,7 +18,13 @@ module.exports.getUsers = async (req, res, next) => {
 };
 
 module.exports.createUser = async (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,14 +37,28 @@ module.exports.createUser = async (req, res, next) => {
       password: hashedPassword,
     });
 
+    if (User.findOne(email)) {
+      throw new ConflictError("Этот пользователь уже зарегистрирован");
+    }
+
     if (!user) {
       throw new BadRequestError("Переданы некорректные данные");
     }
 
-    res.send(user);
+    res.send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    });
   } catch (err) {
     if (err.name === "MongoError" && err.code === 11000) {
       throw new ConflictError("Этот пользователь уже зарегистрирован");
+    }
+
+    if (err.name === "ValidationError") {
+      throw new BadRequestError("Переданы некорректные данные");
     }
 
     next(err);
@@ -70,7 +90,7 @@ module.exports.login = async (req, res, next) => {
 };
 
 module.exports.getUser = async (req, res, next) => {
-  const userId = req.user._id;
+  const userId = req.params.id ?? req.user._id;
 
   try {
     const user = await User.findById(userId);
@@ -81,6 +101,10 @@ module.exports.getUser = async (req, res, next) => {
 
     res.send(user);
   } catch (err) {
+    if (err.name === "CastError") {
+      throw new BadRequestError("Невалидный id");
+    }
+
     next(err);
   }
 };
@@ -102,6 +126,14 @@ module.exports.updateProfile = async (req, res, next) => {
 
     res.send(userProfile);
   } catch (err) {
+    if (err.name === "ValidationError") {
+      throw new BadRequestError("Переданы некорректные данные");
+    }
+
+    if (err.name === "CastError") {
+      throw new BadRequestError("Невалидный id");
+    }
+
     next(err);
   }
 };
@@ -123,6 +155,14 @@ module.exports.updateAvatar = async (req, res, next) => {
 
     res.send(userAvatar);
   } catch (err) {
+    if (err.name === "ValidationError") {
+      throw new BadRequestError("Переданы некорректные данные");
+    }
+
+    if (err.name === "CastError") {
+      throw new BadRequestError("Невалидный id");
+    }
+
     next(err);
   }
 };

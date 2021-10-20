@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const { errors } = require("celebrate");
 const cookieParser = require("cookie-parser");
+const valid = require("./middlewares/validation");
 require("dotenv").config();
 
 const NotFoundError = require("./errors/not-found-err");
@@ -22,8 +23,8 @@ mongoose.connect("mongodb://localhost:27017/mestodb", {
 const userRouter = require("./routes/users");
 const cardRouter = require("./routes/cards");
 
-app.post("/signup", createUser);
-app.post("/signin", login);
+app.post("/signup", valid.validNewUser, createUser);
+app.post("/signin", valid.validLogin, login);
 
 app.use("/users", userRouter);
 app.use("/cards", cardRouter);
@@ -45,5 +46,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.info(`App слушает порт ${PORT}`);
 });
