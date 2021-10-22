@@ -19,27 +19,15 @@ module.exports.getUsers = async (req, res, next) => {
 
 module.exports.createUser = async (req, res, next) => {
   const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
+    name, about, avatar, email, password,
   } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password: hashedPassword,
+      name, about, avatar, email, password: hashedPassword,
     });
-
-    if (User.findOne(email)) {
-      throw new ConflictError("Этот пользователь уже зарегистрирован");
-    }
 
     if (!user) {
       throw new BadRequestError("Переданы некорректные данные");
@@ -53,12 +41,14 @@ module.exports.createUser = async (req, res, next) => {
       email: user.email,
     });
   } catch (err) {
-    if (err.name === "MongoError" && err.code === 11000) {
-      throw new ConflictError("Этот пользователь уже зарегистрирован");
+    if (err.name === "MongoServerError" && err.code === 11000) {
+      next(new ConflictError("Этот пользователь уже зарегистрирован"));
+      return;
     }
 
     if (err.name === "ValidationError") {
-      throw new BadRequestError("Переданы некорректные данные");
+      next(new BadRequestError("Переданы некорректные данные"));
+      return;
     }
 
     next(err);
@@ -102,7 +92,8 @@ module.exports.getUser = async (req, res, next) => {
     res.send(user);
   } catch (err) {
     if (err.name === "CastError") {
-      throw new BadRequestError("Невалидный id");
+      next(new BadRequestError("Невалидный id"));
+      return;
     }
 
     next(err);
@@ -113,11 +104,11 @@ module.exports.updateProfile = async (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
 
-  if (!name || !about) {
-    throw new BadRequestError("Переданы некорректные данные");
-  }
-
   try {
+    if (!name || !about) {
+      throw new BadRequestError("Переданы некорректные данные");
+    }
+
     const userProfile = await User.findByIdAndUpdate(
       userId,
       { name, about },
@@ -127,11 +118,13 @@ module.exports.updateProfile = async (req, res, next) => {
     res.send(userProfile);
   } catch (err) {
     if (err.name === "ValidationError") {
-      throw new BadRequestError("Переданы некорректные данные");
+      next(new BadRequestError("Переданы некорректные данные"));
+      return;
     }
 
     if (err.name === "CastError") {
-      throw new BadRequestError("Невалидный id");
+      next(new BadRequestError("Невалидный id"));
+      return;
     }
 
     next(err);
@@ -156,11 +149,13 @@ module.exports.updateAvatar = async (req, res, next) => {
     res.send(userAvatar);
   } catch (err) {
     if (err.name === "ValidationError") {
-      throw new BadRequestError("Переданы некорректные данные");
+      next(new BadRequestError("Переданы некорректные данные"));
+      return;
     }
 
     if (err.name === "CastError") {
-      throw new BadRequestError("Невалидный id");
+      next(new BadRequestError("Невалидный id"));
+      return;
     }
 
     next(err);

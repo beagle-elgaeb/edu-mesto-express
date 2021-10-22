@@ -2,7 +2,7 @@ const { celebrate, Joi, CelebrateError } = require("celebrate");
 const validator = require("validator");
 
 const validUrl = (link) => {
-  if (!validator.isURL(link)) {
+  if (!validator.isURL(link, { protocols: ["http", "https"], require_protocol: true })) {
     throw new CelebrateError("Некорректный URL");
   }
 

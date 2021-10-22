@@ -25,7 +25,8 @@ module.exports.createCard = async (req, res, next) => {
     res.send(card);
   } catch (err) {
     if (err.name === "ValidationError") {
-      throw new BadRequestError("Переданы некорректные данные");
+      next(new BadRequestError("Переданы некорректные данные"));
+      return;
     }
 
     next(err);
@@ -38,12 +39,12 @@ module.exports.deleteCard = async (req, res, next) => {
   try {
     const card = await Card.findById(cardId);
 
-    if (card.owner.toString() !== req.user._id) {
-      throw new ForbiddenError("Для этого действия недостаточно прав");
-    }
-
     if (!card) {
       throw new NotFoundError("Карточка не найдена");
+    }
+
+    if (card.owner.toString() !== req.user._id) {
+      throw new ForbiddenError("Для этого действия недостаточно прав");
     }
 
     await Card.findByIdAndRemove(cardId);
@@ -51,7 +52,8 @@ module.exports.deleteCard = async (req, res, next) => {
     res.send(card);
   } catch (err) {
     if (err.name === "CastError") {
-      throw new BadRequestError("Невалидный id");
+      next(new BadRequestError("Невалидный id"));
+      return;
     }
 
     next(err);
@@ -75,7 +77,8 @@ module.exports.likeCard = async (req, res, next) => {
     res.send(card);
   } catch (err) {
     if (err.name === "CastError") {
-      throw new BadRequestError("Невалидный id");
+      next(new BadRequestError("Невалидный id"));
+      return;
     }
 
     next(err);
@@ -99,7 +102,8 @@ module.exports.dislikeCard = async (req, res, next) => {
     res.send(card);
   } catch (err) {
     if (err.name === "CastError") {
-      throw new BadRequestError("Невалидный id");
+      next(new BadRequestError("Невалидный id"));
+      return;
     }
 
     next(err);
