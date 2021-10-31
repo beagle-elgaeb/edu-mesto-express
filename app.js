@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { errors } = require("celebrate");
 const cookieParser = require("cookie-parser");
 const valid = require("./middlewares/validation");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 require("dotenv").config();
 
 const NotFoundError = require("./errors/not-found-err");
@@ -23,6 +24,8 @@ mongoose.connect("mongodb://localhost:27017/mestodb", {
 const userRouter = require("./routes/users");
 const cardRouter = require("./routes/cards");
 
+app.use(requestLogger);
+
 app.post("/signup", valid.validNewUser, createUser);
 app.post("/signin", valid.validLogin, login);
 
@@ -32,6 +35,8 @@ app.use("/cards", cardRouter);
 app.use(() => {
   throw new NotFoundError("Запрошена несуществующая страница");
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 
