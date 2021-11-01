@@ -18,7 +18,7 @@
 
 ### Описание
 
-Разработан бэкенд к [предыдущему проекту](https://beagle-elgaeb.github.io/mesto-react-auth).
+Разработан бэкенд к [предыдущему проекту](https://beagle-elgaeb.github.io/edu-mesto-react-auth).
 
 ### Функциональность проекта
 
